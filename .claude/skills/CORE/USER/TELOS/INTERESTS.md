@@ -15,8 +15,8 @@ The technology reshaping everything - capabilities, implications, applications, 
 **Active:** Weekly GM for a TTRPG group
 **Focus:** Improving game mastering craft - storytelling, improvisation, world-building, player engagement
 
-### Writing
-Both non-fiction and fiction. Currently more aspiration than practice due to time constraints.
+### Reading
+Both non-fiction and fiction. A love of books that's currently starved by time constraints.
 
 ---
 
@@ -28,7 +28,7 @@ Both non-fiction and fiction. Currently more aspiration than practice due to tim
 | Social Economics | Values alignment, understanding inequality |
 | AI | Professional relevance (fintech), future preparation |
 | TTRPGs | Creative outlet, social connection, storytelling |
-| Writing | Self-expression, knowledge synthesis |
+| Reading | Knowledge acquisition, escapism, perspective-building |
 
 ---
 
@@ -41,9 +41,8 @@ Both non-fiction and fiction. Currently more aspiration than practice due to tim
 - Audiobooks
 
 **Formats that need dedicated time (harder to fit):**
-- Long-form books
+- Long-form books (physical reading time)
 - Video courses
-- Deep writing practice
 
 ---
 
