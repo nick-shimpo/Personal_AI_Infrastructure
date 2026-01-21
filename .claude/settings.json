@@ -1,0 +1,56 @@
+{
+  "env": {
+    "DA": "Kai",
+    "TIME_ZONE": "Australia/Sydney",
+    "PAI_DIR": "~/.claude",
+    "PAI_SOURCE_APP": "Kai"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/StartupGreeting.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/LoadContext.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/CheckVersion.hook.ts"}
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/SecurityValidator.hook.ts"}
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/UpdateTabTitle.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/SetQuestionTab.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/ExplicitRatingCapture.hook.ts"}
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/FormatEnforcer.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/StopOrchestrator.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/SessionSummary.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/QuestionAnswered.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/AutoWorkCreation.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/WorkCompletionLearning.hook.ts"},
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/ImplicitSentimentCapture.hook.ts"}
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {"type": "command", "command": "bun run $PAI_DIR/hooks/AgentOutputCapture.hook.ts"}
+        ]
+      }
+    ]
+  }
+}
