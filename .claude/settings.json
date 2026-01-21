@@ -1,7 +1,7 @@
 {
   "env": {
     "DA": "Kai",
-    "TIME_ZONE": "Australia/Sydney",
+    "TIME_ZONE": "Europe/Berlin",
     "PAI_DIR": "~/.claude",
     "PAI_SOURCE_APP": "Kai"
   },
