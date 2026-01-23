@@ -16,7 +16,7 @@
 
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
+import { homedir, tmpdir, platform } from 'os';
 import { getIdentity } from './identity';
 
 // ============================================================================
@@ -139,7 +139,7 @@ export function getNotificationConfig(): NotificationConfig {
 // Session Timing
 // ============================================================================
 
-const SESSION_START_FILE = '/tmp/kai-session-start.txt';
+const SESSION_START_FILE = join(tmpdir(), 'pai-session-start.txt');
 
 /**
  * Record session start time (call from SessionStart hook)
@@ -294,7 +294,7 @@ export async function sendDiscord(
 }
 
 /**
- * Send native macOS desktop notification
+ * Send native desktop notification (macOS via osascript, Windows via PowerShell)
  */
 export async function sendDesktop(
   title: string,
@@ -305,15 +305,31 @@ export async function sendDesktop(
   } = {}
 ): Promise<boolean> {
   try {
-    const soundPart = options.sound ? ` sound name "${options.sound}"` : '';
-    const subtitlePart = options.subtitle ? ` subtitle "${options.subtitle}"` : '';
-
-    const script = `display notification "${message}" with title "${title}"${subtitlePart}${soundPart}`;
-
-    const proc = Bun.spawn(['osascript', '-e', script]);
-    await proc.exited;
-
-    return proc.exitCode === 0;
+    if (platform() === 'darwin') {
+      const soundPart = options.sound ? ` sound name "${options.sound}"` : '';
+      const subtitlePart = options.subtitle ? ` subtitle "${options.subtitle}"` : '';
+      const script = `display notification "${message}" with title "${title}"${subtitlePart}${soundPart}`;
+      const proc = Bun.spawn(['osascript', '-e', script]);
+      await proc.exited;
+      return proc.exitCode === 0;
+    } else if (platform() === 'win32') {
+      const escapedTitle = title.replace(/'/g, "''");
+      const escapedMessage = message.replace(/'/g, "''");
+      const psScript = `
+        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+        [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+        $xml = '<toast><visual><binding template="ToastText02"><text id="1">${escapedTitle}</text><text id="2">${escapedMessage}</text></binding></visual></toast>'
+        $toastXml = New-Object Windows.Data.Xml.Dom.XmlDocument
+        $toastXml.LoadXml($xml)
+        $toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml)
+        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('PAI').Show($toast)
+      `.trim();
+      const proc = Bun.spawn(['powershell', '-NoProfile', '-Command', psScript]);
+      await proc.exited;
+      return proc.exitCode === 0;
+    }
+    console.error('Desktop notifications not supported on this platform');
+    return false;
   } catch (error) {
     console.error('Desktop notification failed:', error);
     return false;

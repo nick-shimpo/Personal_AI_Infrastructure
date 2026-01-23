@@ -39,14 +39,38 @@
         "hooks": [
           {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/SecurityValidator.hook.ts"}
         ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/SetQuestionTab.hook.ts"}
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/QuestionAnswered.hook.ts"}
+        ]
       }
     ],
     "UserPromptSubmit": [
       {
         "hooks": [
+          {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/FormatEnforcer.hook.ts"},
+          {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/AutoWorkCreation.hook.ts"},
           {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/ExplicitRatingCapture.hook.ts"},
           {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/ImplicitSentimentCapture.hook.ts"},
           {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/UpdateTabTitle.hook.ts"}
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/WorkCompletionLearning.hook.ts"},
+          {"type": "command", "command": "bun run $CLAUDE_PROJECT_DIR/.claude/hooks/SessionSummary.hook.ts"}
         ]
       }
     ],

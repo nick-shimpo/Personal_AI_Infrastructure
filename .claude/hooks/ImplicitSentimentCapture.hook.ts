@@ -67,6 +67,7 @@ import { inference } from '../skills/CORE/Tools/Inference';
 import { getIdentity, getPrincipal } from './lib/identity';
 import { getLearningCategory } from './lib/learning-utils';
 import { getISOTimestamp, getPSTComponents } from './lib/time';
+import { getPaiDir } from './lib/paths';
 
 const PRINCIPAL_NAME = getPrincipal().name;
 const ASSISTANT_NAME = getIdentity().name;
@@ -264,7 +265,7 @@ async function analyzeSentiment(prompt: string, context: string): Promise<Sentim
     userPrompt,
     expectJson: true,
     timeout: 20000,
-    level: 'standard',  // standard = sonnet
+    level: 'fast',  // fast = haiku (speed + cost)
   });
 
   if (!result.success || !result.parsed) {
@@ -280,7 +281,7 @@ async function analyzeSentiment(prompt: string, context: string): Promise<Sentim
  * NOTE: Ratings are now stored in LEARNING/SIGNALS/ (consolidated from separate SIGNALS/)
  */
 function writeImplicitRating(entry: ImplicitRatingEntry): void {
-  const baseDir = process.env.PAI_DIR || join(process.env.HOME!, '.claude');
+  const baseDir = getPaiDir();
   const signalsDir = join(baseDir, 'MEMORY', 'LEARNING', 'SIGNALS');
   const ratingsFile = join(signalsDir, 'ratings.jsonl');
 
@@ -303,7 +304,7 @@ function captureLowRatingLearning(
 ): void {
   if (rating >= 6) return;
 
-  const baseDir = process.env.PAI_DIR || join(process.env.HOME!, '.claude');
+  const baseDir = getPaiDir();
   const { year, month, day, hours, minutes, seconds } = getPSTComponents();
 
   const yearMonth = `${year}-${month}`;
@@ -424,7 +425,8 @@ async function main() {
     }
 
     // Neutral sentiment gets rating 5 (baseline for feature requests)
-    if (sentiment.rating === null) {
+    const isNeutral = sentiment.rating === null;
+    if (isNeutral) {
       sentiment.rating = 5;
       console.error('[ImplicitSentimentCapture] Neutral sentiment, assigning baseline rating 5');
     }
@@ -448,7 +450,7 @@ async function main() {
     writeImplicitRating(entry);
 
     // Update trending analysis cache (fire-and-forget, don't block)
-    const baseDir = process.env.PAI_DIR || join(process.env.HOME!, '.claude');
+    const baseDir = getPaiDir();
     const trendingScript = join(baseDir, 'tools', 'TrendingAnalysis.ts');
     if (existsSync(trendingScript)) {
       Bun.spawn(['bun', trendingScript, '--force'], {
@@ -458,7 +460,8 @@ async function main() {
       console.error('[ImplicitSentimentCapture] Triggered TrendingAnalysis update');
     }
 
-    if (sentiment.rating < 6) {
+    // Only capture learning for actual negative sentiment, not neutral baseline
+    if (!isNeutral && sentiment.rating < 6) {
       captureLowRatingLearning(
         sentiment.rating,
         sentiment.summary,

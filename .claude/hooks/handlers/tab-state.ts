@@ -29,6 +29,13 @@ const INACTIVE_TEXT_COLOR = '#A0A0A0';
  * Handle tab state update with pre-parsed transcript data.
  */
 export async function handleTabState(parsed: ParsedTranscript): Promise<void> {
+  // Kitty terminal features only available when KITTY_LISTEN_ON or xterm-kitty is set
+  const isKitty = process.env.TERM === 'xterm-kitty' || !!process.env.KITTY_LISTEN_ON;
+  if (!isKitty) {
+    console.error('[TabState] Not a Kitty terminal, skipping tab state update');
+    return;
+  }
+
   let plainCompletion = parsed.plainCompletion;
 
   // Validate completion

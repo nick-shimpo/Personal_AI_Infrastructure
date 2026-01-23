@@ -238,14 +238,12 @@ function setTabTitle(title: string, state: TabState = 'normal'): void {
 
       // Set color based on state
       if (state === 'inference') {
-        // Purple for inference/AI thinking - active tab stays dark blue, inactive shows purple
         execSync(
           `kitten @ set-tab-color --self active_bg=${ACTIVE_TAB_BG} active_fg=${ACTIVE_TEXT} inactive_bg=${TAB_INFERENCE_BG} inactive_fg=${INACTIVE_TEXT}`,
           { stdio: 'ignore', timeout: 2000 }
         );
         console.error('[UpdateTabTitle] Set inference color (purple on inactive only)');
       } else if (state === 'working') {
-        // Orange for actively working - active tab stays dark blue, inactive shows orange
         execSync(
           `kitten @ set-tab-color --self active_bg=${ACTIVE_TAB_BG} active_fg=${ACTIVE_TEXT} inactive_bg=${TAB_WORKING_BG} inactive_fg=${INACTIVE_TEXT}`,
           { stdio: 'ignore', timeout: 2000 }
@@ -255,10 +253,9 @@ function setTabTitle(title: string, state: TabState = 'normal'): void {
 
       console.error('[UpdateTabTitle] Set via Kitty remote control');
     } else {
-      // Fallback to escape codes for other terminals
-      execSync(`printf '\\033]0;${escaped}\\007' >&2`, { stdio: ['pipe', 'pipe', 'inherit'] });
-      execSync(`printf '\\033]2;${escaped}\\007' >&2`, { stdio: ['pipe', 'pipe', 'inherit'] });
-      execSync(`printf '\\033]30;${escaped}\\007' >&2`, { stdio: ['pipe', 'pipe', 'inherit'] });
+      // Fallback: write OSC escape codes directly to stderr (cross-platform)
+      process.stderr.write(`\x1b]0;${truncated}\x07`);
+      process.stderr.write(`\x1b]2;${truncated}\x07`);
     }
   } catch (err) {
     console.error(`[UpdateTabTitle] Failed to set title: ${err}`);
@@ -272,11 +269,13 @@ function announceVoice(summary: string): void {
   try {
     // Summary already starts with gerund - use directly, capitalize first letter
     const message = summary.charAt(0).toUpperCase() + summary.slice(1);
-    const escaped = message.replace(/"/g, '\\"');
-    execSync(
-      `curl -s -X POST http://localhost:8888/notify -H "Content-Type: application/json" -d '{"message": "${escaped}"}' > /dev/null 2>&1 &`,
-      { stdio: 'ignore', timeout: 2000 }
-    );
+    const body = JSON.stringify({ message });
+    // Use fetch for cross-platform HTTP (fire-and-forget)
+    fetch('http://localhost:8888/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    }).catch(() => { /* Voice server might not be running */ });
   } catch {
     // Voice server might not be running
   }
@@ -300,8 +299,8 @@ async function main() {
     console.error(`[UpdateTabTitle] Quick fallback: "${quickFallback}"`);
     setTabTitle(`🧠${quickFallback}`, 'inference');  // Brain = AI thinking/inference
 
-    // Get better summary from Sonnet (standard level with full conversation context)
-    console.error('[UpdateTabTitle] Calling Sonnet inference with context...');
+    // Get better summary from Haiku (fast level with conversation context)
+    console.error('[UpdateTabTitle] Calling Haiku inference with context...');
     const rawSummary = await summarizePrompt(prompt, data.transcript_path);
     console.error(`[UpdateTabTitle] Raw summary: "${rawSummary}"`);
 

@@ -368,13 +368,32 @@ function validatePath(filePath: string, action: PathAction): { action: 'allow' |
 // Tool-Specific Handlers
 // ========================================
 
+function outputAllow(): void {
+  console.log(JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "allow"
+    }
+  }));
+}
+
+function outputAsk(reason: string): void {
+  console.log(JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "ask",
+      permissionDecisionReason: reason
+    }
+  }));
+}
+
 function handleBash(input: HookInput): void {
   const command = typeof input.tool_input === 'string'
     ? input.tool_input
     : (input.tool_input?.command as string) || '';
 
   if (!command) {
-    console.log(JSON.stringify({ continue: true }));
+    outputAllow();
     return;
   }
 
@@ -408,10 +427,7 @@ function handleBash(input: HookInput): void {
         reason: result.reason,
         action_taken: 'Prompted user for confirmation'
       });
-      console.log(JSON.stringify({
-        decision: 'ask',
-        message: `⚠️ ${result.reason}\n\nCommand: ${command.slice(0, 200)}\n\nProceed?`
-      }));
+      outputAsk(`⚠️ ${result.reason}\n\nCommand: ${command.slice(0, 200)}\n\nProceed?`);
       break;
 
     case 'alert':
@@ -427,11 +443,11 @@ function handleBash(input: HookInput): void {
       });
       console.error(`⚠️ ALERT: ${result.reason}`);
       console.error(`Command: ${command.slice(0, 100)}`);
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
       break;
 
     default:
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
   }
 }
 
@@ -441,7 +457,7 @@ function handleEdit(input: HookInput): void {
     : (input.tool_input?.file_path as string) || '';
 
   if (!filePath) {
-    console.log(JSON.stringify({ continue: true }));
+    outputAllow();
     return;
   }
 
@@ -475,14 +491,11 @@ function handleEdit(input: HookInput): void {
         reason: result.reason,
         action_taken: 'Prompted user for confirmation'
       });
-      console.log(JSON.stringify({
-        decision: 'ask',
-        message: `⚠️ ${result.reason}\n\nPath: ${filePath}\n\nProceed?`
-      }));
+      outputAsk(`⚠️ ${result.reason}\n\nPath: ${filePath}\n\nProceed?`);
       break;
 
     default:
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
   }
 }
 
@@ -492,7 +505,7 @@ function handleWrite(input: HookInput): void {
     : (input.tool_input?.file_path as string) || '';
 
   if (!filePath) {
-    console.log(JSON.stringify({ continue: true }));
+    outputAllow();
     return;
   }
 
@@ -526,14 +539,11 @@ function handleWrite(input: HookInput): void {
         reason: result.reason,
         action_taken: 'Prompted user for confirmation'
       });
-      console.log(JSON.stringify({
-        decision: 'ask',
-        message: `⚠️ ${result.reason}\n\nPath: ${filePath}\n\nProceed?`
-      }));
+      outputAsk(`⚠️ ${result.reason}\n\nPath: ${filePath}\n\nProceed?`);
       break;
 
     default:
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
   }
 }
 
@@ -543,7 +553,7 @@ function handleRead(input: HookInput): void {
     : (input.tool_input?.file_path as string) || '';
 
   if (!filePath) {
-    console.log(JSON.stringify({ continue: true }));
+    outputAllow();
     return;
   }
 
@@ -567,7 +577,7 @@ function handleRead(input: HookInput): void {
       break;
 
     default:
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
   }
 }
 
@@ -588,14 +598,14 @@ async function main(): Promise<void> {
     ]);
 
     if (!text.trim()) {
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
       return;
     }
 
     input = JSON.parse(text);
   } catch {
     // Parse error or timeout - fail open
-    console.log(JSON.stringify({ continue: true }));
+    outputAllow();
     return;
   }
 
@@ -616,11 +626,11 @@ async function main(): Promise<void> {
       break;
     default:
       // Allow all other tools
-      console.log(JSON.stringify({ continue: true }));
+      outputAllow();
   }
 }
 
 // Run main, fail open on any error
 main().catch(() => {
-  console.log(JSON.stringify({ continue: true }));
+  outputAllow();
 });
