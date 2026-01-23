@@ -112,10 +112,15 @@ This line is spoken aloud. Without it, your response is SILENT.
 - RIGHT: "Fixed auth bug by adding null check. All 47 tests passing."
 `;
 
-    // Output as system-reminder - this gets injected into context
-    console.log(`<system-reminder>
-${essentialFormat}
-</system-reminder>`);
+    // Output as JSON with hookSpecificOutput format
+    // Claude Code expects JSON output starting with { — raw text is discarded
+    const output = {
+      hookSpecificOutput: {
+        hookEventName: "UserPromptSubmit",
+        additionalContext: essentialFormat.trim()
+      }
+    };
+    console.log(JSON.stringify(output));
 
     process.exit(0);
   } catch (error) {
