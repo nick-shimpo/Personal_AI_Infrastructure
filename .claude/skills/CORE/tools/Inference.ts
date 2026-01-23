@@ -69,9 +69,10 @@ export async function inference(options: InferenceOptions): Promise<InferenceRes
   const timeout = options.timeout || config.defaultTimeout;
 
   return new Promise((resolve) => {
-    // Build environment WITHOUT ANTHROPIC_API_KEY to force subscription auth
+    // Build clean environment for subprocess
     const env = { ...process.env };
-    delete env.ANTHROPIC_API_KEY;
+    delete env.ANTHROPIC_API_KEY;  // Force subscription auth
+    delete env.CLAUDE_CODE_GIT_BASH_PATH;  // Forward-slash path breaks subprocess on Windows
 
     const args = [
       '--print',
