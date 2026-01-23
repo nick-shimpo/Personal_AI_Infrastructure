@@ -190,10 +190,10 @@ async function main() {
     const currentDate = await getCurrentDate();
     console.error(`📅 Current Date: ${currentDate}`);
 
-    // Output the PAI content as a system-reminder
-    // This will be injected into Claude's context at session start
-    const message = `<system-reminder>
-PAI CORE CONTEXT (Auto-loaded at Session Start)
+    // Build the context message
+    const contextParts: string[] = [];
+
+    contextParts.push(`PAI CORE CONTEXT (Auto-loaded at Session Start)
 
 📅 CURRENT DATE/TIME: ${currentDate}
 
@@ -201,21 +201,24 @@ The following context has been loaded from ${paiSkillPath}:
 
 ${paiContent}
 
-This context is now active for this session. Follow all instructions, preferences, and guidelines contained above.
-</system-reminder>`;
+This context is now active for this session. Follow all instructions, preferences, and guidelines contained above.`);
 
-    // Write to stdout (will be captured by Claude Code)
-    console.log(message);
-
-    // Output success confirmation for Claude to acknowledge
-    console.log('\n✅ PAI Context successfully loaded...');
-
-    // Check for active progress files and display them
+    // Check for active progress files and append them
     const activeProgress = await checkActiveProgress(paiDir);
     if (activeProgress) {
-      console.log(activeProgress);
+      contextParts.push(activeProgress);
       console.error('📋 Active work found from previous sessions');
     }
+
+    // Output as JSON with hookSpecificOutput format
+    // This ensures Claude Code parses and injects into model context
+    const output = {
+      hookSpecificOutput: {
+        hookEventName: "SessionStart",
+        additionalContext: contextParts.join('\n\n')
+      }
+    };
+    console.log(JSON.stringify(output));
 
     console.error('✅ PAI context injected into session');
     process.exit(0);

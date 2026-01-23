@@ -71,6 +71,8 @@ try {
   // Run the banner tool if it exists
   const bannerPath = join(paiDir, 'skills', 'CORE', 'Tools', 'Banner.ts');
 
+  let bannerText = '';
+
   if (existsSync(bannerPath)) {
     const result = spawnSync('bun', ['run', bannerPath], {
       encoding: 'utf-8',
@@ -83,13 +85,24 @@ try {
     });
 
     if (result.stdout) {
-      console.log(result.stdout);
+      bannerText = result.stdout.trim();
     }
   } else {
     // Simple fallback greeting when Banner.ts is not available
     const daName = settings.daidentity?.name || settings.env?.DA || 'PAI';
     const catchphrase = settings.daidentity?.startupCatchphrase || `${daName} here, ready to go.`;
-    console.log(`\n  ${daName} v${settings.paiVersion || '2.3'} | ${catchphrase}\n`);
+    bannerText = `${daName} v${settings.paiVersion || '2.3'} | ${catchphrase}`;
+  }
+
+  // Output as JSON with hookSpecificOutput format
+  if (bannerText) {
+    const output = {
+      hookSpecificOutput: {
+        hookEventName: "SessionStart",
+        additionalContext: bannerText
+      }
+    };
+    console.log(JSON.stringify(output));
   }
 
   process.exit(0);
