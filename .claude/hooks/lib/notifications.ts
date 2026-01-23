@@ -18,6 +18,7 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir, tmpdir, platform } from 'os';
 import { getIdentity } from './identity';
+import { expandPath } from './paths';
 
 // ============================================================================
 // Types
@@ -108,7 +109,7 @@ function expandEnvVars(content: string): string {
  */
 export function getNotificationConfig(): NotificationConfig {
   try {
-    const paiDir = process.env.PAI_DIR || join(homedir(), '.claude');
+    const paiDir = expandPath(process.env.PAI_DIR || join(homedir(), '.claude'));
     const settingsPath = join(paiDir, 'settings.json');
 
     if (existsSync(settingsPath)) {

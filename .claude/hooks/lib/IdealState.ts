@@ -6,6 +6,7 @@
 
 import { existsSync, readFileSync, appendFileSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { getPaiDir } from './paths';
 
 // DEBUG flag - set DEBUG_HOOKS=true to see informational output
 const DEBUG = process.env.DEBUG_HOOKS === 'true';
@@ -168,7 +169,7 @@ export interface GapMetrics {
   criteria_progress: CriteriaProgress;  // NEW: Per-criterion progress
 }
 
-const CLAUDE_DIR = process.env.PAI_DIR || process.env.HOME + '/.claude';
+const CLAUDE_DIR = getPaiDir();
 const WORK_DIR = join(CLAUDE_DIR, 'MEMORY', 'Work');
 
 /**

@@ -72,6 +72,7 @@ import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { getPSTComponents, getISOTimestamp } from './lib/time';
 import { readHookInput } from './lib/stdin';
+import { getPaiDir } from './lib/paths';
 import { inference } from '../skills/CORE/Tools/Inference';
 
 interface CurrentWork {
@@ -87,7 +88,7 @@ interface WorkClassification {
   effort: 'TRIVIAL' | 'QUICK' | 'STANDARD' | 'THOROUGH';
 }
 
-const BASE_DIR = process.env.PAI_DIR || join(process.env.HOME!, '.claude');
+const BASE_DIR = getPaiDir();
 const WORK_DIR = join(BASE_DIR, 'MEMORY', 'WORK');
 const STATE_DIR = join(BASE_DIR, 'MEMORY', 'STATE');
 const CURRENT_WORK_FILE = join(STATE_DIR, 'current-work.json');
