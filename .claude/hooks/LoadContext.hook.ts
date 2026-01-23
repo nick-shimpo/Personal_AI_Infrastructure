@@ -52,19 +52,27 @@
  */
 
 import { readFileSync, existsSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { join, sep } from 'path';
 import { spawn } from 'child_process';
 import { getPaiDir } from './lib/paths';
 import { recordSessionStart } from './lib/notifications';
 
 async function getCurrentDate(): Promise<string> {
   try {
-    const proc = Bun.spawn(['date', '+%Y-%m-%d %H:%M:%S %Z'], {
-      stdout: 'pipe',
-      env: { ...process.env, TZ: process.env.TIME_ZONE || 'America/Los_Angeles' }
+    const tz = process.env.TIME_ZONE || 'America/Los_Angeles';
+    const now = new Date();
+    const formatted = now.toLocaleString('en-US', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZoneName: 'short'
     });
-    const output = await new Response(proc.stdout).text();
-    return output.trim();
+    return formatted;
   } catch (error) {
     console.error('Failed to get current date:', error);
     return new Date().toISOString();
@@ -147,7 +155,9 @@ async function main() {
   try {
     // Check if this is a subagent session - if so, exit silently
     const claudeProjectDir = process.env.CLAUDE_PROJECT_DIR || '';
-    const isSubagent = claudeProjectDir.includes('/.claude/Agents/') ||
+    const agentPathSegment = `${sep}.claude${sep}Agents${sep}`;
+    const isSubagent = claudeProjectDir.includes(agentPathSegment) ||
+                      claudeProjectDir.includes('/.claude/Agents/') ||
                       process.env.CLAUDE_AGENT_TYPE !== undefined;
 
     if (isSubagent) {
@@ -161,7 +171,7 @@ async function main() {
     console.error('⏱️ Session start time recorded for notification timing');
 
     const paiDir = getPaiDir();
-    const paiSkillPath = join(paiDir, 'skills/CORE/SKILL.md');
+    const paiSkillPath = join(paiDir, 'skills', 'CORE', 'SKILL.md');
 
     // Verify PAI skill file exists
     if (!existsSync(paiSkillPath)) {

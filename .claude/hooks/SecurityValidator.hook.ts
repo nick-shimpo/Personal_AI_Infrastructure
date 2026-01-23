@@ -61,7 +61,7 @@
  */
 
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { parse as parseYaml } from 'yaml';
 import { paiPath } from './lib/paths';
@@ -119,7 +119,7 @@ function getSecurityLogPath(event: SecurityEvent): string {
 function logSecurityEvent(event: SecurityEvent): void {
   try {
     const logPath = getSecurityLogPath(event);
-    const dir = logPath.substring(0, logPath.lastIndexOf('/'));
+    const dir = dirname(logPath);
 
     // Ensure directory exists
     if (!existsSync(dir)) {

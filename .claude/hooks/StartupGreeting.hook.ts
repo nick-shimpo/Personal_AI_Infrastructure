@@ -45,8 +45,8 @@
  * - normal (85+ cols): Full neofetch-style
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { join, sep } from 'path';
 import { spawnSync } from 'child_process';
 
 import { getPaiDir, getSettingsPath } from './lib/paths';
@@ -59,32 +59,42 @@ try {
 
   // Check if this is a subagent session - if so, exit silently
   const claudeProjectDir = process.env.CLAUDE_PROJECT_DIR || '';
-  const isSubagent = claudeProjectDir.includes('/.claude/Agents/') ||
+  const agentPathSegment = `${sep}.claude${sep}Agents${sep}`;
+  const isSubagent = claudeProjectDir.includes(agentPathSegment) ||
+                    claudeProjectDir.includes('/.claude/Agents/') ||
                     process.env.CLAUDE_AGENT_TYPE !== undefined;
 
   if (isSubagent) {
     process.exit(0);
   }
 
-  // Run the banner tool
-  const bannerPath = join(paiDir, 'skills/CORE/Tools/Banner.ts');
-  const result = spawnSync('bun', ['run', bannerPath], {
-    encoding: 'utf-8',
-    stdio: ['inherit', 'pipe', 'pipe'],
-    env: {
-      ...process.env,
-      // Pass through terminal detection env vars
-      COLUMNS: process.env.COLUMNS,
-      KITTY_WINDOW_ID: process.env.KITTY_WINDOW_ID,
-    }
-  });
+  // Run the banner tool if it exists
+  const bannerPath = join(paiDir, 'skills', 'CORE', 'Tools', 'Banner.ts');
 
-  if (result.stdout) {
-    console.log(result.stdout);
+  if (existsSync(bannerPath)) {
+    const result = spawnSync('bun', ['run', bannerPath], {
+      encoding: 'utf-8',
+      stdio: ['inherit', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        COLUMNS: process.env.COLUMNS,
+        KITTY_WINDOW_ID: process.env.KITTY_WINDOW_ID,
+      }
+    });
+
+    if (result.stdout) {
+      console.log(result.stdout);
+    }
+  } else {
+    // Simple fallback greeting when Banner.ts is not available
+    const daName = settings.daidentity?.name || settings.env?.DA || 'PAI';
+    const catchphrase = settings.daidentity?.startupCatchphrase || `${daName} here, ready to go.`;
+    console.log(`\n  ${daName} v${settings.paiVersion || '2.3'} | ${catchphrase}\n`);
   }
 
   process.exit(0);
 } catch (error) {
   console.error('StartupGreeting: Failed to display banner', error);
-  process.exit(1);
+  // Non-critical hook - exit 0 to not block session start
+  process.exit(0);
 }
