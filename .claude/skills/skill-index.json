@@ -1,0 +1,302 @@
+{
+  "generated": "2026-01-23T15:12:09.096Z",
+  "totalSkills": 11,
+  "alwaysLoadedCount": 2,
+  "deferredCount": 9,
+  "skills": {
+    "agents": {
+      "name": "Agents",
+      "path": "Agents\\SKILL.md",
+      "fullDescription": "Dynamic agent composition and management system. USE WHEN user says create custom agents, spin up custom agents, specialized agents, OR asks for agent personalities, available traits, agent voices. Handles custom agent creation, personality assignment, voice mapping, and parallel agent orchestration.",
+      "triggers": [
+        "create",
+        "custom",
+        "agents",
+        "spin",
+        "specialized",
+        "asks",
+        "agent",
+        "personalities",
+        "available",
+        "traits",
+        "voices",
+        "voice"
+      ],
+      "workflows": [
+        "CREATECUSTOMAGENT",
+        "CreateCustomAgent",
+        "LISTTRAITS",
+        "ListTraits",
+        "SPAWNPARALLEL",
+        "SpawnParallelAgents",
+        "CORE"
+      ],
+      "tier": "deferred"
+    },
+    "core": {
+      "name": "CORE",
+      "path": "CORE\\SKILL.md",
+      "fullDescription": "Personal AI Infrastructure core. AUTO-LOADS at session start. The authoritative reference for how the PAI system works, how to use it, and all system-level configuration. USE WHEN any session begins, user asks about the system, identity, configuration, workflows, security, or any other question about how the PAI system operates.",
+      "triggers": [
+        "any",
+        "session",
+        "begins",
+        "system",
+        "identity",
+        "configuration",
+        "workflows",
+        "security",
+        "other",
+        "question",
+        "how",
+        "pai",
+        "operates"
+      ],
+      "workflows": [
+        "GitPush",
+        "Delegation",
+        "BackgroundDelegation",
+        "TreeOfThought",
+        "HomeBridgeManagement"
+      ],
+      "tier": "always"
+    },
+    "council": {
+      "name": "Council",
+      "path": "Council\\SKILL.md",
+      "fullDescription": "Multi-agent debate system. USE WHEN council, debate, perspectives, agents discuss. SkillSearch('council') for docs.",
+      "triggers": [
+        "council",
+        "debate",
+        "perspectives",
+        "agents",
+        "discuss"
+      ],
+      "workflows": [
+        "Debate",
+        "Quick"
+      ],
+      "tier": "deferred"
+    },
+    "createcli": {
+      "name": "CreateCLI",
+      "path": "CreateCLI\\SKILL.md",
+      "fullDescription": "Generate TypeScript CLIs. USE WHEN create CLI, build CLI, command-line tool. SkillSearch('createcli') for docs.",
+      "triggers": [
+        "create",
+        "cli",
+        "build",
+        "command-line",
+        "tool"
+      ],
+      "workflows": [
+        "CreateCli",
+        "AddCommand",
+        "UpgradeTier"
+      ],
+      "tier": "deferred"
+    },
+    "createskill": {
+      "name": "CreateSkill",
+      "path": "CreateSkill\\SKILL.md",
+      "fullDescription": "Create and validate skills. USE WHEN create skill, new skill, skill structure, canonicalize. SkillSearch('createskill') for docs.",
+      "triggers": [
+        "create",
+        "skill",
+        "new",
+        "structure",
+        "canonicalize"
+      ],
+      "workflows": [
+        "Create",
+        "CompanyDueDiligence",
+        "WorkflowName",
+        "CreateSkill",
+        "ValidateSkill",
+        "UpdateSkill",
+        "CanonicalizeSkill"
+      ],
+      "tier": "deferred"
+    },
+    "firstprinciples": {
+      "name": "FirstPrinciples",
+      "path": "FirstPrinciples\\SKILL.md",
+      "fullDescription": "First principles analysis. USE WHEN first principles, fundamental, root cause, decompose. SkillSearch('firstprinciples') for docs.",
+      "triggers": [
+        "first",
+        "principles",
+        "fundamental",
+        "root",
+        "cause",
+        "decompose"
+      ],
+      "workflows": [
+        "Deconstruct",
+        "Challenge",
+        "Reconstruct"
+      ],
+      "tier": "deferred"
+    },
+    "prompting": {
+      "name": "Prompting",
+      "path": "Prompting\\SKILL.md",
+      "fullDescription": "Meta-prompting system for dynamic prompt generation using templates, standards, and patterns. USE WHEN meta-prompting, template generation, prompt optimization, or programmatic prompt composition.",
+      "triggers": [
+        "meta-prompting",
+        "template",
+        "generation",
+        "prompt",
+        "optimization",
+        "programmatic",
+        "composition"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    },
+    "research": {
+      "name": "Research",
+      "path": "Research\\SKILL.md",
+      "fullDescription": "Comprehensive research, analysis, and content extraction system. USE WHEN user says 'do research', 'do extensive research', 'quick research', 'minor research', 'research this', 'find information', 'investigate', 'extract wisdom', 'extract alpha', 'analyze content', 'can't get this content', 'use fabric', OR requests any web/content research. Supports three research modes (quick/standard/extensive), deep content analysis, intelligent retrieval, and 242+ Fabric patterns. NOTE: For due diligence, OSINT, or background checks, use OSINT skill instead.",
+      "triggers": [
+        "research",
+        "extensive",
+        "quick",
+        "minor",
+        "this",
+        "find",
+        "information",
+        "investigate",
+        "extract",
+        "wisdom",
+        "alpha",
+        "analyze",
+        "content",
+        "cant",
+        "get",
+        "use",
+        "fabric",
+        "requests",
+        "any",
+        "web/content",
+        "osint"
+      ],
+      "workflows": [
+        "OSINT",
+        "QuickResearch",
+        "StandardResearch",
+        "ExtensiveResearch",
+        "ExtractAlpha",
+        "Retrieve",
+        "YoutubeExtraction",
+        "WebScraping",
+        "ClaudeResearch",
+        "InterviewResearch",
+        "AnalyzeAiTrends",
+        "Fabric",
+        "Enhance",
+        "ExtractKnowledge"
+      ],
+      "tier": "always"
+    },
+    "system": {
+      "name": "System",
+      "path": "System\\SKILL.md",
+      "fullDescription": "System maintenance with four core operations - integrity check (find/fix broken references), document session (current transcript), document recent (catch-up since last update), git push (git commit + push). Plus security workflows. USE WHEN integrity check, audit system, document session, document this session, document today, document recent, catch up docs, what's undocumented, git push, commit and push, check for secrets, security scan, privacy check, cross-repo validation, OR asking about past work (\"we just worked on\", \"remember when we\").",
+      "triggers": [
+        "integrity",
+        "check",
+        "audit",
+        "system",
+        "document",
+        "session",
+        "this",
+        "today",
+        "recent",
+        "catch",
+        "docs",
+        "whats",
+        "undocumented",
+        "git",
+        "push",
+        "commit",
+        "secrets",
+        "security",
+        "scan",
+        "privacy",
+        "cross-repo",
+        "validation",
+        "asking",
+        "past",
+        "work",
+        "(we",
+        "just",
+        "worked",
+        "remember",
+        "when",
+        "we)"
+      ],
+      "workflows": [
+        "PAI",
+        "CORE",
+        "IntegrityCheck",
+        "DocumentSession",
+        "DocumentRecent",
+        "GitPush",
+        "SecretScanning",
+        "CrossRepoValidation",
+        "PrivacyCheck",
+        "WorkContextRecall"
+      ],
+      "tier": "deferred"
+    },
+    "telos": {
+      "name": "Telos",
+      "path": "TELOS\\SKILL.md",
+      "fullDescription": "Life OS and project analysis. USE WHEN TELOS, life goals, projects, dependencies, books, movies. SkillSearch('telos') for docs.",
+      "triggers": [
+        "telos",
+        "life",
+        "goals",
+        "projects",
+        "dependencies",
+        "books",
+        "movies"
+      ],
+      "workflows": [
+        "Update",
+        "InterviewExtraction",
+        "CreateNarrativePoints",
+        "WriteReport"
+      ],
+      "tier": "deferred"
+    },
+    "thealgorithm": {
+      "name": "THEALGORITHM",
+      "path": "THEALGORITHM\\SKILL.md",
+      "fullDescription": "Universal execution engine using scientific method to achieve ideal state. USE WHEN complex tasks, multi-step work, \"run the algorithm\", \"use the algorithm\", OR any non-trivial request that benefits from structured execution with ISC (Ideal State Criteria) tracking.",
+      "triggers": [
+        "complex",
+        "tasks",
+        "multi-step",
+        "work",
+        "run",
+        "algorithm",
+        "use",
+        "any",
+        "non-trivial",
+        "request",
+        "that",
+        "benefits",
+        "structured",
+        "execution",
+        "isc",
+        "(ideal",
+        "state",
+        "criteria)",
+        "tracking"
+      ],
+      "workflows": [],
+      "tier": "deferred"
+    }
+  }
+}

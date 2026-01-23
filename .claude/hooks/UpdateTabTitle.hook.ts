@@ -64,6 +64,7 @@ import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { inference } from '../skills/CORE/Tools/Inference';
 import { isValidTabSummary, getTabFallback } from './lib/response-format';
+import { readHookInput } from './lib/stdin';
 
 // Tab colors - different states
 const TAB_WORKING_BG = '#804000';      // Dark orange - actively working
@@ -72,26 +73,6 @@ const ACTIVE_TAB_BG = '#002B80';       // Dark blue - active tab base
 const ACTIVE_TEXT = '#FFFFFF';          // White text for active
 const INACTIVE_TEXT = '#A0A0A0';        // Gray text for inactive
 
-
-interface HookInput {
-  session_id: string;
-  prompt: string;
-  transcript_path: string;
-  hook_event_name: string;
-}
-
-/**
- * Read stdin with timeout
- */
-async function readStdinWithTimeout(timeout: number = 5000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    const timer = setTimeout(() => reject(new Error('Timeout')), timeout);
-    process.stdin.on('data', (chunk) => { data += chunk.toString(); });
-    process.stdin.on('end', () => { clearTimeout(timer); resolve(data); });
-    process.stdin.on('error', (err) => { clearTimeout(timer); reject(err); });
-  });
-}
 
 /**
  * Quick fallback - just a generic placeholder while inference runs
@@ -284,8 +265,7 @@ function announceVoice(summary: string): void {
 async function main() {
   try {
     console.error('[UpdateTabTitle] Hook started');
-    const input = await readStdinWithTimeout();
-    const data: HookInput = JSON.parse(input);
+    const data = await readHookInput();
     const prompt = data.prompt || '';
     console.error(`[UpdateTabTitle] Prompt: "${prompt.slice(0, 50)}..."`);
 

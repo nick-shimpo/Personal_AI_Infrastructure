@@ -61,32 +61,13 @@ import { getLearningCategory } from './lib/learning-utils';
 import { getPrincipalName } from './lib/identity';
 import { getISOTimestamp, getPSTComponents } from './lib/time';
 import { getPaiDir } from './lib/paths';
-
-interface HookInput {
-  session_id: string;
-  prompt: string;
-  transcript_path: string;
-  hook_event_name: string;
-}
+import { readHookInput } from './lib/stdin';
 
 interface RatingEntry {
   timestamp: string;
   rating: number;
   comment?: string;
   session_id: string;
-}
-
-/**
- * Read stdin with timeout
- */
-async function readStdinWithTimeout(timeout: number = 5000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    const timer = setTimeout(() => reject(new Error('Timeout')), timeout);
-    process.stdin.on('data', (chunk) => { data += chunk.toString(); });
-    process.stdin.on('end', () => { clearTimeout(timer); resolve(data); });
-    process.stdin.on('error', (err) => { clearTimeout(timer); reject(err); });
-  });
 }
 
 /**
@@ -237,8 +218,7 @@ ${comment ? `**${getPrincipalName()}'s feedback:** ${comment}` : ''}
 async function main() {
   try {
     console.error('[ExplicitRatingCapture] Hook started');
-    const input = await readStdinWithTimeout();
-    const data: HookInput = JSON.parse(input);
+    const data = await readHookInput();
     const prompt = data.prompt || '';
 
     const result = parseRating(prompt);

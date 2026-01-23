@@ -68,17 +68,10 @@ import { getIdentity, getPrincipal } from './lib/identity';
 import { getLearningCategory } from './lib/learning-utils';
 import { getISOTimestamp, getPSTComponents } from './lib/time';
 import { getPaiDir } from './lib/paths';
+import { readHookInput } from './lib/stdin';
 
 const PRINCIPAL_NAME = getPrincipal().name;
 const ASSISTANT_NAME = getIdentity().name;
-
-interface HookInput {
-  session_id: string;
-  prompt?: string;        // Actual field name from Claude Code
-  user_prompt?: string;   // Legacy field name
-  transcript_path: string;
-  hook_event_name: string;
-}
 
 interface SentimentResult {
   rating: number | null;
@@ -181,19 +174,6 @@ function isExplicitRating(prompt: string): boolean {
   }
 
   return true;
-}
-
-/**
- * Read stdin with timeout
- */
-async function readStdinWithTimeout(timeout: number = 5000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    const timer = setTimeout(() => reject(new Error('Timeout')), timeout);
-    process.stdin.on('data', (chunk) => { data += chunk.toString(); });
-    process.stdin.on('end', () => { clearTimeout(timer); resolve(data); });
-    process.stdin.on('error', (err) => { clearTimeout(timer); reject(err); });
-  });
 }
 
 /**
@@ -394,10 +374,8 @@ This response triggered a ${rating}/10 implicit rating based on detected user se
 async function main() {
   try {
     console.error('[ImplicitSentimentCapture] Hook started');
-    const input = await readStdinWithTimeout();
-    const data: HookInput = JSON.parse(input);
-    // The payload uses 'prompt' (Claude Code) - user_prompt is legacy
-    const prompt = data.prompt || data.user_prompt || '';
+    const data = await readHookInput();
+    const prompt = data.prompt || '';
 
     // Skip if explicit rating (let ExplicitRatingCapture handle)
     if (isExplicitRating(prompt)) {

@@ -71,15 +71,8 @@
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { getPSTComponents, getISOTimestamp } from './lib/time';
+import { readHookInput } from './lib/stdin';
 import { inference } from '../skills/CORE/Tools/Inference';
-
-interface HookInput {
-  session_id: string;
-  prompt?: string;        // Actual field name from Claude Code
-  user_prompt?: string;   // Legacy field name
-  transcript_path: string;
-  hook_event_name: string;
-}
 
 interface CurrentWork {
   session_id: string;
@@ -122,19 +115,6 @@ EXAMPLES:
 "What is the codebase structure?" → {"type": "question", "title": "", "effort": "TRIVIAL"}
 "Thanks" → {"type": "conversational", "title": "", "effort": "TRIVIAL"}
 "Add user authentication with JWT" → {"type": "work", "title": "Add JWT authentication", "effort": "STANDARD"}`;
-
-/**
- * Read stdin with timeout
- */
-async function readStdinWithTimeout(timeout: number = 5000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    const timer = setTimeout(() => reject(new Error('Timeout')), timeout);
-    process.stdin.on('data', (chunk) => { data += chunk.toString(); });
-    process.stdin.on('end', () => { clearTimeout(timer); resolve(data); });
-    process.stdin.on('error', (err) => { clearTimeout(timer); reject(err); });
-  });
-}
 
 /**
  * Read current work state
@@ -317,10 +297,8 @@ async function main() {
   try {
     console.error('[AutoWorkCreation] Hook started');
 
-    const input = await readStdinWithTimeout();
-    const data: HookInput = JSON.parse(input);
-    // The payload uses 'prompt' (Claude Code) - user_prompt is legacy
-    const prompt = data.prompt || data.user_prompt || '';
+    const data = await readHookInput();
+    const prompt = data.prompt || '';
     const sessionId = data.session_id || 'unknown';
 
     if (!prompt || prompt.length < 2) {
